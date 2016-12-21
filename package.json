@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "A cordovaplugin to stream from mobile",
   "cordova": {
-    "id": "aia-plugin-stream",
+    "id": "aiastream",
     "platforms": [
       "android",
       "ios"
