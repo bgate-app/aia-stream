@@ -1,5 +1,5 @@
 {
-  "name": "aia-stream",
+  "name": "aiastream",
   "version": "0.0.1",
   "description": "A cordovaplugin to stream from mobile",
   "cordova": {
