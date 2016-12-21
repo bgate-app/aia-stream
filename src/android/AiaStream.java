@@ -1,4 +1,4 @@
-package aia-plugin-stream;
+package com.aia.stream;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
