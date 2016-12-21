@@ -1,0 +1,27 @@
+{
+  "name": "aia-stream",
+  "version": "0.0.1",
+  "description": "A cordovaplugin to stream from mobile",
+  "cordova": {
+    "id": "aia-plugin-stream",
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgate-app/aia-stream.git"
+  },
+  "keywords": [
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "author": "bgate-app",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bgate-app/aia-stream/issues"
+  },
+  "homepage": "https://github.com/bgate-app/aia-stream#readme"
+}
