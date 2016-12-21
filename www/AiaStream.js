@@ -6,7 +6,7 @@ var AiaStream = function () {
 
 AiaStream.prototype.startStream = function (options) {
 	options = options || {};
-	exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "startStream", [url, options]);
+	exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "startStream", [options]);
 };
 
 AiaStream.prototype.stopStream = function (options) {
