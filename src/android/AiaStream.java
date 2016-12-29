@@ -49,6 +49,18 @@ public class AiaStream extends CordovaPlugin {
         }else if (action.equals("getCameraDirection")) {
             this.onGetCameraDirection(args, callbackContext);
             return true;
+        } else if (action.equals("initVideoPlayer")) {
+            this.onInitVideoPlayer(args, callbackContext);
+            return true;
+        } else if (action.equals("stopVideoPlayer")) {
+            this.onStopVideoPlayer(args, callbackContext);
+            return true;
+        } else if (action.equals("playVideo")) {
+            this.onPlayVideo(args, callbackContext);
+            return true;
+        } else if (action.equals("reloadVideo")) {
+            this.onReloadVideo(args, callbackContext);
+            return true;
         }
         return false;
     }
@@ -105,6 +117,22 @@ public class AiaStream extends CordovaPlugin {
     }
     private void stopStream( CallbackContext callbackContext) {
         Log.d(TAG, "stopStream: ");
+    }
+
+    private void onReloadVideo(JSONArray args, CallbackContext callbackContext) {
+          Log.d(TAG, "onReloadVideo: ");
+    }
+
+    private void onPlayVideo(JSONArray args, CallbackContext callbackContext) {
+        Log.d(TAG, "onPlayVideo: " + args.toString());
+    }
+
+    private void onStopVideoPlayer(JSONArray args, CallbackContext callbackContext) {
+         Log.d(TAG, "onStopVideoPlayer: ");
+    }
+
+    private void onInitVideoPlayer(JSONArray args, CallbackContext callbackContext) {
+          Log.d(TAG, "onInitVideoPlayer: ");
     }
 
 }
