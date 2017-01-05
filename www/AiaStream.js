@@ -91,6 +91,11 @@ AiaStream.prototype.stopVideoPlayer = function() {
         exec(() => { resolve(); }, () => { reject(); }, "AiaStream", "stopVideoPlayer", []);
     });
 };
+AiaStream.prototype.stopAll = function() {
+    return new Promise((resolve, reject) => {
+        exec(() => { resolve(); }, () => { reject(); }, "AiaStream", "stopAll", []);
+    });
+};
 
 AiaStream.prototype.reloadVideo = function() {
     return new Promise((resolve, reject) => {

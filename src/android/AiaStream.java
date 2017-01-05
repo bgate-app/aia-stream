@@ -66,6 +66,9 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         } else if (action.equals("stopVideoPlayer")) {
             this.onStopVideoPlayer(args, callbackContext);
             return true;
+        } else if (action.equals("stopAll")) {
+            this.onStopAll(args, callbackContext);
+            return true;
         } else if (action.equals("playVideo")) {
             this.onPlayVideo(args, callbackContext);
             return true;
@@ -231,6 +234,9 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
                 mPlayer.stopStream();
             }
         });
+    }
+    private void onStopAll(JSONArray args, CallbackContext callbackContext) {
+        Log.d(TAG, "onStopAll: ");        
     }
 
     private void onInitVideoPlayer(JSONArray args, CallbackContext callbackContext) {
