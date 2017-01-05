@@ -106,6 +106,14 @@ AiaStream.prototype.playVideo = function(url) {
     });
 };
 
+AiaStream.prototype.playDefaultVideo = function(url) {
+    return new Promise((resolve, reject) => {
+        exec(() => { resolve(); }, () => { reject(); }, "AiaStream", "playDefaultVideo", [{
+            url: url
+        }]);
+    });
+};
+
 var aiaStream = new AiaStream();
 
 if (!window.plugins) {
