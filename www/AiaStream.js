@@ -26,7 +26,7 @@ AiaStream.prototype.stopCameraPreview = function() {
         exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "stopCameraPreview", []);
     });
 };
-AiaStream.prototype.startBroadcast = function(sucess, error, options) {
+AiaStream.prototype.startBroadcast = function(success, error, options) {
     exec(success, error, "AiaStream", "startBroadcast", [options]);
 };
 
