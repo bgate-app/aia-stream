@@ -4,80 +4,62 @@ var AiaStream = function() {
 
 }
 
-AiaStream.prototype.init = function() {
-    exec(null, null, "AiaStream", "init", []);
-};
-
-AiaStream.prototype.startCameraPreview = function(configs) {
+AiaStream.prototype.initAll = function() {
     return new Promise((resolve, reject) => {
-        exec(function(data) {
-            resolve(data);
-        }, function(error) {
-            reject(error);
-        }, "AiaStream", "startCameraPreview", [configs]);
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "initAll", []);
+    });
+};
+AiaStream.prototype.initBroadcast = function() {
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "initBroadcast", []);
     });
 };
 
-AiaStream.prototype.stopCameraPreview = function(options) {
+AiaStream.prototype.startCameraPreview = function() {
     return new Promise((resolve, reject) => {
-        exec(function() { resolve(); }, function() { reject(); }, "AiaStream", "stopCameraPreview", []);
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "startCameraPreview", []);
     });
 };
 
-AiaStream.prototype.startBroadcast = function(configs) {
+AiaStream.prototype.stopCameraPreview = function() {
     return new Promise((resolve, reject) => {
-        exec(function(data) {
-            resolve(data);
-        }, function(error) {
-            reject(error);
-        }, "AiaStream", "startBroadcast", [configs]);
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "stopCameraPreview", []);
+    });
+};
+AiaStream.prototype.startBroadcast = function(options) {
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "startBroadcast", [options]);
     });
 };
 
-AiaStream.prototype.stopBroadcast = function(configs) {
+AiaStream.prototype.stopBroadcast = function() {
     return new Promise((resolve, reject) => {
-        exec(function(data) {
-            resolve(data);
-        }, function(error) {
-            reject(error);
-        }, "AiaStream", "stopBroadcast", [configs]);
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "stopBroadcast", []);
+    });
+};
+AiaStream.prototype.stopBroadcastAndPreview = function() {
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "stopBroadcastAndPreview", []);
+    });
+};
+AiaStream.prototype.switchCamera = function() {
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "switchCamera", []);
     });
 };
 
-AiaStream.prototype.switchCamera = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "switchCamera", []);
-};
-
-AiaStream.prototype.setVideoQuality = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "setVideoQuality", [options]);
-};
-
-AiaStream.prototype.setBroadcastConfig = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "setBroadcastConfig", [options]);
+AiaStream.prototype.setFilter = function(options) {
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "setFilter", [options]);
+    });
 };
 
 AiaStream.prototype.setAudioEnable = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "setAudioEnable", [options]);
+    return new Promise((resolve, reject) => {
+        exec(function(data) { resolve(data); }, function(data) { reject(data); }, "AiaStream", "setAudioEnable", [options]);
+    });
 };
 
-AiaStream.prototype.isAudioEnable = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "isAudioEnable", [options]);
-};
-
-AiaStream.prototype.isBroadcasting = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "isBroadcasting", [options]);
-};
-
-AiaStream.prototype.getCameraDirection = function(options) {
-    options = options || {};
-    exec(options.successCallback || null, options.errorCallback || null, "AiaStream", "getCameraDirection", [options]);
-};
 
 
 AiaStream.prototype.initVideoPlayer = function() {

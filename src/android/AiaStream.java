@@ -1,13 +1,12 @@
 
 package com.aia.stream;
 
+
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,20 +14,49 @@ import org.json.JSONObject;
 import io.vov.vitamio.MediaPlayer;
 
 
-public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListener {
-    private String TAG = getClass().getSimpleName();
-    private REStreamHelper mHelper;
+public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListener, AiaVideoView.VideoPlayerListener {
+    enum ViewType {
+        NONE, STREAM_BROADCAST, STREAM_PLAYER, VIDEOVIEW
+    }
+
+    ViewType mViewType = ViewType.NONE;
     private String mRTMPAddress = "";
     private RTMPPlayer mPlayer;
+    private RTMPClientHelper mBroadcast;
     private boolean mSuccessEnable = true;
-    private CallbackContext mPlayeStreamCallback;
+    private CallbackContext mPlayerStreamCallback;
 
+    public void setViewType(ViewType newType) {
+        this.mViewType = newType;
+        if (this.mViewType == ViewType.NONE) {
+            if (this.mBroadcast != null) this.mBroadcast.setVisible(false);
+            if (this.mPlayer != null) this.mPlayer.setVisible(false);
+            this.enableWebviewBackground(true);
+        } else if (this.mViewType == ViewType.STREAM_BROADCAST) {
+            if (this.mBroadcast != null) this.mBroadcast.setVisible(true);
+            if (this.mPlayer != null) this.mPlayer.setVisible(false);
+            this.enableWebviewBackground(false);
+        } else if (this.mViewType == ViewType.STREAM_PLAYER) {
+            if (this.mBroadcast != null) this.mBroadcast.setVisible(false);
+            if (this.mPlayer != null) this.mPlayer.setVisible(true);
+            this.enableWebviewBackground(false);
+        } else if (this.mViewType == ViewType.VIDEOVIEW) {
+            if (this.mBroadcast != null) this.mBroadcast.setVisible(false);
+            if (this.mPlayer != null) this.mPlayer.setVisible(false);
+            this.enableWebviewBackground(false);
+        }
+    }
 
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
-
-        if (action.equals("startCameraPreview")) {
-            this.onStartCameraPreview(args.getJSONObject(0), callbackContext);
+        if (action.equals("initAll")) {
+            this.onInitAll(args, callbackContext);
+            return true;
+        } else if (action.equals("initBroadcast")) {
+            this.onInitBroadcast(args, callbackContext);
+            return true;
+        } else if (action.equals("startCameraPreview")) {
+            this.onStartCameraPreview(args, callbackContext);
             return true;
         } else if (action.equals("stopCameraPreview")) {
             this.onStopCameraPreview(args, callbackContext);
@@ -39,14 +67,14 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         } else if (action.equals("stopBroadcast")) {
             this.onStopBroadcast(args, callbackContext);
             return true;
+        } else if (action.equals("stopBroadcastAndPreview")) {
+            this.onStopBroadcastAndPreview(args, callbackContext);
+            return true;
         } else if (action.equals("switchCamera")) {
             this.onSwitchCamera(args, callbackContext);
             return true;
-        } else if (action.equals("setVideoQuality")) {
-            this.onSetVideoQuality(args, callbackContext);
-            return true;
-        } else if (action.equals("setBroadcastConfig")) {
-            this.onSetBroadcastConfig(args, callbackContext);
+        } else if (action.equals("setFilter")) {
+            this.onSetFilter(args, callbackContext);
             return true;
         } else if (action.equals("setAudioEnable")) {
             this.onSetAudioEnable(args, callbackContext);
@@ -83,100 +111,149 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     }
 
     private void onSwitchCamera(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onSwitchCamera: " + args.toString());
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                mHelper.switchCamera();
+                mBroadcast.switchCamera();
             }
         });
     }
 
     private void onStopBroadcast(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onStopBroadcast: " + args.toString());
-        enableWebviewBackground(true);
-        cordova.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mHelper.stopBroadcast();
-            }
-        });
+        if (this.mBroadcast != null) {
+            this.mBroadcast.setCallback(null);
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBroadcast.stopBroadcast();
+                    AiaStream.this.setViewType(ViewType.NONE);
+                }
+            });
+        }
+
     }
 
-    private void onSetVideoQuality(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onSetVideoQuality: " + args.toString());
+    private void onStopBroadcastAndPreview(JSONArray args, CallbackContext callbackContext) {
+        if (this.mBroadcast != null) {
+            this.mBroadcast.setCallback(null);
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBroadcast.stopBroadcastAndPreview();
+                    AiaStream.this.setViewType(ViewType.NONE);
+                }
+            });
+        }
     }
 
-    private void onSetBroadcastConfig(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onSetBroadcastConfig: " + args.toString());
+
+    private void onSetFilter(JSONArray args, CallbackContext callbackContext) {
+        try {
+            JSONObject data = args.getJSONObject(0);
+            final int filter = data.getInt("filter");
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBroadcast.setFilter(filter);
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callbackContext.error("Có lỗi xảy ra");
+        }
     }
 
     private void onSetAudioEnable(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onSetAudioEnable: " + args.toString());
+        try {
+            JSONObject data = args.getJSONObject(0);
+            final boolean enable = data.getBoolean("enable");
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBroadcast.setAudioEnable(enable);
+                }
+            });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callbackContext.error("Có lỗi xảy ra");
+        }
     }
 
     private void isAudioEnable(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "isAudioEnable: " + args.toString());
+
     }
 
     private void isBroadcasting(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "isBroadcasting: " + args.toString());
+
     }
 
     private void onGetCameraDirection(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onGetCameraDirection: " + args.toString());
+
     }
 
     private void onStartBroadcast(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onStartBroadcast: " + args.toString());
-        cordova.getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (mHelper != null) {
-                    mHelper.startStreaming();
-                }
+        if (mBroadcast != null) mBroadcast.setCallback(callbackContext);
+        try {
+            final JSONObject data = args.getJSONObject(0);
+            mRTMPAddress = data.getString("rtmp");
+            if (mRTMPAddress == "") {
+                callbackContext.error("Không tìm thấy địa chỉ server");
+            } else {
+                cordova.getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mBroadcast.startBroadcast(mRTMPAddress);
+                        if (data.has("audio_enable")) {
+                            try {
+                                boolean audioEnable = data.getBoolean("audio_enable");
+                                mBroadcast.setAudioEnable(audioEnable);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        if (data.has("filter")) {
+                            try {
+                                int filter = data.getInt("filter");
+                                mBroadcast.setFilter(filter);
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
             }
-        });
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callbackContext.error("Có lỗi xảy ra");
+        }
     }
 
     private void enableWebviewBackground(boolean enable) {
         webView.getView().setBackgroundColor(enable ? Color.WHITE : 0x00000000);
     }
 
-    private void onStartCameraPreview(JSONObject args, CallbackContext callbackContext) {
-
-        this.mRTMPAddress = "";
-        try {
-            mRTMPAddress = args.getString("rtmp");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        if (mRTMPAddress == "") {
-            callbackContext.error("Không tìm thấy địa chỉ server");
-        } else {
-            enableWebviewBackground(false);
-            callbackContext.success("Start camera success");
-            cordova.getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (mHelper == null) {
-                        mHelper = new REStreamHelper(cordova.getActivity());
-                        mHelper.init();
-                    }
-                    mHelper.prepare(mRTMPAddress);
-                }
-            });
-        }
-        Log.d(TAG, "onStartCameraPreview: " + mRTMPAddress);
+    private void onStartCameraPreview(JSONArray args, CallbackContext callbackContext) {
+        callbackContext.success("Start camera success");
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mBroadcast.startCameraPreview();
+                AiaStream.this.setViewType(ViewType.STREAM_BROADCAST);
+            }
+        });
     }
 
     private void onStopCameraPreview(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onStopCameraPreview: " + args.toString());
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mBroadcast.stopBroadcastAndPreview();
+                AiaStream.this.setViewType(ViewType.NONE);
+            }
+        });
     }
 
     private void onReloadVideo(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onReloadVideo: ");
-
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -184,8 +261,9 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
             }
         });
     }
-     private void onPlayDefaultVideo(JSONArray args, CallbackContext callbackContext) {
-        this.mPlayeStreamCallback = callbackContext;
+
+    private void onPlayDefaultVideo(JSONArray args, CallbackContext callbackContext) {
+        this.mPlayerStreamCallback = callbackContext;
         mSuccessEnable = true;
         enableWebviewBackground(false);
         try {
@@ -201,12 +279,10 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "onPlayDefaultVideo: " + args.toString());
     }
 
     private void onPlayVideo(JSONArray args, CallbackContext callbackContext) {
-
-        this.mPlayeStreamCallback = callbackContext;
+        this.mPlayerStreamCallback = callbackContext;
         mSuccessEnable = true;
         enableWebviewBackground(false);
         try {
@@ -215,6 +291,7 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    setViewType(ViewType.STREAM_PLAYER);
                     mPlayer.setStreamUrl(url);
                     mPlayer.playStream();
                 }
@@ -222,25 +299,56 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "onPlayVideo: " + args.toString());
     }
 
     private void onStopVideoPlayer(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onStopVideoPlayer: ");
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                enableWebviewBackground(true);
                 mPlayer.stopStream();
+                AiaStream.this.setViewType(ViewType.NONE);
             }
         });
     }
+
     private void onStopAll(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onStopAll: ");        
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mPlayer.stopStream();
+                AiaStream.this.setViewType(ViewType.NONE);
+            }
+        });
+    }
+
+    private void onInitAll(JSONArray args, final CallbackContext callbackContext) {
+        cordova.getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (mBroadcast == null) mBroadcast = new RTMPClientHelper(cordova.getActivity());
+                if (mPlayer == null) {
+                    mPlayer = new RTMPPlayer(cordova.getActivity());
+                    mPlayer.initVideoPlayer();
+                    mPlayer.setStreamListener(AiaStream.this);
+                }
+                callbackContext.success();
+            }
+        });
+    }
+
+
+    private void onInitBroadcast(JSONArray args, CallbackContext callbackContext) {
+        if (this.mBroadcast == null) {
+            cordova.getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mBroadcast = new RTMPClientHelper(cordova.getActivity());
+                }
+            });
+        }
     }
 
     private void onInitVideoPlayer(JSONArray args, CallbackContext callbackContext) {
-        Log.d(TAG, "onInitVideoPlayer: ");
         if (this.mPlayer == null) {
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
@@ -250,17 +358,15 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
                     mPlayer.setStreamListener(AiaStream.this);
                 }
             });
-
         }
     }
 
     @Override
     public void onStreamState(int state) {
         if (state == MediaPlayer.MEDIA_INFO_DOWNLOAD_RATE_CHANGED && mSuccessEnable) {
-            if (this.mPlayeStreamCallback != null) {
-                this.mPlayeStreamCallback.success();
-                Log.d(TAG, "onStreamState: play sucess");
-                this.mPlayeStreamCallback = null;
+            if (this.mPlayerStreamCallback != null) {
+                this.mPlayerStreamCallback.success();
+                this.mPlayerStreamCallback = null;
             }
             mSuccessEnable = false;
         }
@@ -273,14 +379,35 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     }
 
     @Override
+    public void onPause(boolean multitasking) {
+        if (this.mPlayer != null) this.mPlayer.onPause();
+        if (this.mBroadcast != null) this.mBroadcast.onPause();
+        super.onPause(multitasking);
+    }
+
+    @Override
     public void onResume(boolean multitasking) {
+        if (this.mPlayer != null) this.mPlayer.onResume();
+        if (this.mBroadcast != null) this.mBroadcast.onResume();
         super.onResume(multitasking);
-        this.mPlayer.onResume();
+
     }
 
     @Override
     public void onDestroy() {
-        if (this.mHelper != null) this.mHelper.onDestroy();
         if (this.mPlayer != null) this.mPlayer.onDestroy();
+        if (this.mBroadcast != null) this.mBroadcast.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    public void onVideoPlayState(int state) {
+        if (state == 1 && mSuccessEnable) {
+            if (mPlayerStreamCallback != null) {
+                mPlayerStreamCallback.success();
+                this.mPlayerStreamCallback = null;
+            }
+            mSuccessEnable = false;
+        }
     }
 }
