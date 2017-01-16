@@ -4,6 +4,7 @@ package com.aia.stream;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.util.Log;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CallbackContext;
@@ -14,9 +15,9 @@ import org.json.JSONObject;
 import io.vov.vitamio.MediaPlayer;
 
 
-public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListener, AiaVideoView.VideoPlayerListener {
+public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListener {
     enum ViewType {
-        NONE, STREAM_BROADCAST, STREAM_PLAYER, VIDEOVIEW
+        NONE, STREAM_BROADCAST, STREAM_PLAYER
     }
 
     ViewType mViewType = ViewType.NONE;
@@ -39,10 +40,6 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         } else if (this.mViewType == ViewType.STREAM_PLAYER) {
             if (this.mBroadcast != null) this.mBroadcast.setVisible(false);
             if (this.mPlayer != null) this.mPlayer.setVisible(true);
-            this.enableWebviewBackground(false);
-        } else if (this.mViewType == ViewType.VIDEOVIEW) {
-            if (this.mBroadcast != null) this.mBroadcast.setVisible(false);
-            if (this.mPlayer != null) this.mPlayer.setVisible(false);
             this.enableWebviewBackground(false);
         }
     }
@@ -121,12 +118,11 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
 
     private void onStopBroadcast(JSONArray args, CallbackContext callbackContext) {
         if (this.mBroadcast != null) {
-            this.mBroadcast.setCallback(null);
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     mBroadcast.stopBroadcast();
-                    AiaStream.this.setViewType(ViewType.NONE);
+                    AiaStream.this.setViewType(ViewType.STREAM_BROADCAST);
                 }
             });
         }
@@ -135,7 +131,6 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
 
     private void onStopBroadcastAndPreview(JSONArray args, CallbackContext callbackContext) {
         if (this.mBroadcast != null) {
-            this.mBroadcast.setCallback(null);
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -166,7 +161,7 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     private void onSetAudioEnable(JSONArray args, CallbackContext callbackContext) {
         try {
             JSONObject data = args.getJSONObject(0);
-            final boolean enable = data.getBoolean("enable");
+            final boolean enable = data.getBoolean("audio_enable");
             cordova.getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -265,7 +260,6 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     private void onPlayDefaultVideo(JSONArray args, CallbackContext callbackContext) {
         this.mPlayerStreamCallback = callbackContext;
         mSuccessEnable = true;
-        enableWebviewBackground(false);
         try {
             JSONObject object = args.getJSONObject(0);
             final String url = object.getString("url");
@@ -284,7 +278,6 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     private void onPlayVideo(JSONArray args, CallbackContext callbackContext) {
         this.mPlayerStreamCallback = callbackContext;
         mSuccessEnable = true;
-        enableWebviewBackground(false);
         try {
             JSONObject object = args.getJSONObject(0);
             final String url = object.getString("url");
@@ -322,6 +315,7 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
     }
 
     private void onInitAll(JSONArray args, final CallbackContext callbackContext) {
+        Log.e("AHUHU", "onInitAll: ");
         cordova.getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -400,14 +394,4 @@ public class AiaStream extends CordovaPlugin implements RTMPPlayer.StreamListene
         super.onDestroy();
     }
 
-    @Override
-    public void onVideoPlayState(int state) {
-        if (state == 1 && mSuccessEnable) {
-            if (mPlayerStreamCallback != null) {
-                mPlayerStreamCallback.success();
-                this.mPlayerStreamCallback = null;
-            }
-            mSuccessEnable = false;
-        }
-    }
 }

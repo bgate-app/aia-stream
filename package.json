@@ -1,27 +1,36 @@
 {
-  "name": "aiastream",
-  "version": "0.0.1",
-  "description": "A cordovaplugin to stream from mobile",
-  "cordova": {
-    "id": "aiastream",
-    "platforms": [
-      "android",
-      "ios"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bgate-app/aia-stream.git"
-  },
-  "keywords": [
-    "ecosystem:cordova",
-    "cordova-android",
-    "cordova-ios"
-  ],
-  "author": "bgate-app",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/bgate-app/aia-stream/issues"
-  },
-  "homepage": "https://github.com/bgate-app/aia-stream#readme"
+    "name": "aiastream",
+    "version": "0.0.1",
+    "description": "A cordovaplugin to stream from mobile",
+    "cordova": {
+        "id": "aiastream",
+        "platforms": [
+            "android",
+            "ios"
+        ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/bgate-app/aia-stream.git"
+    },
+    "keywords": [
+        "ecosystem:cordova",
+        "cordova-android",
+        "cordova-ios"
+    ],
+    "author": "bgate-app",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/bgate-app/aia-stream/issues"
+    },
+    "homepage": "https://github.com/bgate-app/aia-stream#readme",
+    "dependencies": {
+        "cordova": "*"
+    },
+    "devDependencies": {
+        "gulp": "*",
+        "gulp-uglify": "*",
+        "pump": "*",
+        "gulp-release-it": "~1"
+    }
 }
