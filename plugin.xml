@@ -13,15 +13,12 @@
 			</feature>
 		</config-file>
 		<config-file parent="/*" target="AndroidManifest.xml">
+			<uses-permission android:name="android.permission.INTERNET"></uses-permission>
             <uses-permission android:name="android.permission.CAMERA"></uses-permission>
             <uses-permission android:name="android.permission.RECORD_AUDIO"></uses-permission>
         </config-file>
 		
-		<source-file src="src/android/AiaStream.java" target-dir="src/com/aia/stream" />
-		<source-file src="src/android/RTMPClientHelper.java" target-dir="src/com/aia/stream" />
-		<source-file src="src/android/RTMPPlayer.java" target-dir="src/com/aia/stream" />
-    	<source-file src="src/android/camera.xml" target-dir="res/layout" />	
-
+		<source-file src="src/android/AiaStream.java" target-dir="src/com/aia/stream" />		
 	</platform>
 	<platform name="ios">
 		<config-file parent="/*" target="config.xml">
